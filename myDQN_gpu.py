@@ -1,3 +1,5 @@
+import os
+
 import myGym                                               # import my maze env
 import math
 import random
@@ -52,8 +54,8 @@ class DQN(nn.Module):
         # design layers
         self.conv1 = nn.Conv2d(1, 32, kernel_size=2, stride=1)
         self.bn1 = nn.BatchNorm2d(32)
-        self.conv2 = nn.Conv2d(32, 32, kernel_size=1, stride=1)
-        self.bn2 = nn.BatchNorm2d(32)
+        self.conv2 = nn.Conv2d(32, 64, kernel_size=1, stride=1)
+        self.bn2 = nn.BatchNorm2d(64)
 
         # compute map size
         def conv2d_size_out(size, kernel_size, stride):
@@ -61,7 +63,8 @@ class DQN(nn.Module):
 
         convw = conv2d_size_out(conv2d_size_out(w, 2, 1), 1, 1)
         convh = conv2d_size_out(conv2d_size_out(h, 2, 1), 1, 1)
-        linear_input_size = convw * convh * 32
+        linear_input_size = convw * convh * 64
+
         self.l1 = nn.Linear(linear_input_size, 128)
         self.l2 = nn.Linear(128, actions)
 
@@ -96,13 +99,13 @@ def get_screen():
 # Training
 
 # hyperparameters initialization
-BATCH_SIZE = 32
-GAMMA = 0.8                 # the parameter in the updating formula
+BATCH_SIZE = 128
+GAMMA = 0.9                 # the parameter in the updating formula
 EPS_START = 1.0             # greedy policy
 EPS_END = 0.1
 EPS_DECAY = 5000
 TARGET_UPDATE = 5
-
+REPLAY_MEMORY_SIZE = 5000   # experience memory size
 
 # read maze screen, only agent observation (field : 3 * 3)
 init_screen = get_screen()
@@ -122,7 +125,7 @@ target_net.eval()
 optimizer = optim.RMSprop(eval_net.parameters())
 
 # set length of Replay Memory
-memory = ReplayMemory(5000)
+memory = ReplayMemory(REPLAY_MEMORY_SIZE)
 
 # count agent's steps
 steps_done = 0
@@ -268,6 +271,10 @@ for i_episode in range(num_episodes):
     # update the target network, copying all weights and biases from eval net to target net
     if i_episode % TARGET_UPDATE == 0:
         target_net.load_state_dict(eval_net.state_dict())
+        if os.path.exists('./weights/'):
+            continue
+        else:
+            os.makedirs('./weights/')
         torch.save(eval_net.state_dict(), 'weights/eval_net_weights_{0}.pth'.format(i_episode))
 
 print('Complete')
