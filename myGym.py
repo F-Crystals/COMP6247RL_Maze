@@ -158,10 +158,6 @@ class Env_Maze(gym.Env):
         self.counts = 0
         return self.state
 
-    def seed(self, seed=None):
-        self.np_random, seed = seeding.np_random(seed)
-        return [seed]
-
     # openCV to draw the maze
     def init_maze(self):
         self.maze = np.zeros((201, 201, 3), dtype=np.uint8)
