@@ -10,15 +10,15 @@ import cv2
 
 MAX_STEPS_NUM = 10000               # game over if steps larger than 10000
 STEP_PENALTY = 0.1                  # every step costs in order to minimize the path, the time consumption
-FAIL_PENALTY = 1000                 # negative reward if fail
-SUCCESS_REWARD = 20000              # big positive reward if win
-STAY_PENALTY = 5                    # expect agent not to stay
+FAIL_PENALTY = 100                  # negative reward if fail
+SUCCESS_REWARD = 2000               # big positive reward if win
+STAY_PENALTY = 0.5                  # expect agent not to stay
 # MOVE_TO_FIRE_PENALTY = 1          # at first I thought if agent see the fire and still move to the fire,
                                     # it should be penalized. However, I changed my idea after,
                                     # because I thought this may cause agent learn the wrong logic.
-MOVE_TO_WALL_PENALTY = 10           # expect agent not to move to the wall
+MOVE_TO_WALL_PENALTY = 1            # expect agent not to move to the wall
 MOVE_TO_TARGET_REWARD = 0.2         # samll positive reward if move towards the target
-DEAD_POINT_PENALTY = 50             # expect agent not to stay and frequently visit the dead point
+DEAD_POINT_PENALTY = 10             # expect agent not to stay and frequently visit the dead point
 VISITED_PENALTY = 1                 # expect agent to try others ways to the target
 
 
