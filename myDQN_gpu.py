@@ -22,26 +22,6 @@ env = myGym.Env_Maze()
 # use gpu if could
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-# -------------------------------------------------------------------------------------------------------------
-# Experience Replay Memory
-
-Transition = namedtuple('Transition', ('state', 'action', 'next_state', 'reward'))
-
-
-class ReplayMemory(object):
-
-    def __init__(self, capacity):
-        self.memory = deque([], maxlen=capacity)
-
-    def push(self, *args):
-        self.memory.append(Transition(*args))
-
-    def sample(self, batch_size):
-        return random.sample(self.memory, batch_size)
-
-    def __len__(self):
-        return len(self.memory)
-
 
 # -------------------------------------------------------------------------------------------------------------
 # DQN
@@ -77,6 +57,27 @@ class DQN(nn.Module):
 
 
 # -------------------------------------------------------------------------------------------------------------
+# Experience Replay Memory
+
+Transition = namedtuple('Transition', ('state', 'action', 'next_state', 'reward'))
+
+
+class ReplayMemory(object):
+
+    def __init__(self, capacity):
+        self.memory = deque([], maxlen=capacity)
+
+    def push(self, *args):
+        self.memory.append(Transition(*args))
+
+    def sample(self, batch_size):
+        return random.sample(self.memory, batch_size)
+
+    def __len__(self):
+        return len(self.memory)
+
+
+# -------------------------------------------------------------------------------------------------------------
 # Input extraction
 
 resize = T.Compose([T.ToPILImage(),
@@ -85,6 +86,7 @@ resize = T.Compose([T.ToPILImage(),
                     T.ToTensor()])
 
 
+# get the input to the network
 def get_screen():
     # transpose it into torch order (CHW).
     screen = env.render(mode='rgb_array').transpose((2, 0, 1))
@@ -167,6 +169,7 @@ def plot_rewards():
     plt.pause(0.001)  # pause a bit so that plots are updated
 
 
+# network optimisation
 def optimize_model():
     if len(memory) < BATCH_SIZE:
         return
@@ -185,7 +188,7 @@ def optimize_model():
     next_state_values[non_final_mask] = target_net(non_final_next_states).max(1)[0].detach()
     expected_state_action_values = (next_state_values * GAMMA) + reward_batch
 
-    # compute Huber loss
+    # compute loss
     criterion = nn.MSELoss()
     loss = criterion(state_action_values, expected_state_action_values.unsqueeze(1))
 
@@ -228,6 +231,7 @@ for i_episode in range(num_episodes):
     done, state_queue, next_state_queue = random_start()
 
     state = torch.cat(tuple(state_queue), dim=1)
+
     for step in count():
         total_reward = 0
         reward = 0
